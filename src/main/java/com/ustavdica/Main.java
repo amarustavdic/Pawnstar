@@ -1,6 +1,5 @@
 package com.ustavdica;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
@@ -53,22 +52,4 @@ public class Main {
         }
     }
 
-
-    public static class Move {
-        int from;
-        int to;
-
-        public Move(int from, int to) {
-            this.from = from;
-            this.to = to;
-        }
-
-        @Override
-        public String toString() {
-            return "Move{ " +
-                    "from=" + from +
-                    ", to=" + to +
-                    " }";
-        }
-    }
 }
