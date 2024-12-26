@@ -161,18 +161,18 @@ public class BoardState {
     private char getUnicodePiece(int index) {
         // TODO: This can be simplified since I am using same characters for both set of peaces
         return switch (index) {
-            case 0 -> '\u265F'; // White Pawn
-            case 1 -> '\u265E'; // White Knight
-            case 2 -> '\u265D'; // White Bishop
-            case 3 -> '\u265C'; // White Rook
-            case 4 -> '\u265B'; // White Queen
-            case 5 -> '\u265A'; // White King
-            case 6 -> '\u265F'; // Black Pawn
-            case 7 -> '\u265E'; // Black Knight
-            case 8 -> '\u265D'; // Black Bishop
-            case 9 -> '\u265C'; // Black Rook
-            case 10 -> '\u265B'; // Black Queen
-            case 11 -> '\u265A'; // Black King
+            case 0 -> '♟'; // White Pawn
+            case 1 -> '♞'; // White Knight
+            case 2 -> '♝'; // White Bishop
+            case 3 -> '♜'; // White Rook
+            case 4 -> '♛'; // White Queen
+            case 5 -> '♚'; // White King
+            case 6 -> '♟'; // Black Pawn
+            case 7 -> '♞'; // Black Knight
+            case 8 -> '♝'; // Black Bishop
+            case 9 -> '♜'; // Black Rook
+            case 10 -> '♛'; // Black Queen
+            case 11 -> '♚'; // Black King
             default -> ' '; // Empty square
         };
     }
