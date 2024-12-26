@@ -65,6 +65,21 @@ public class BoardState {
         stateInfo = 0b1111L; // Both sides can castle initially
     }
 
+
+    private int toBitIndex(int row, int col) {
+        return row * 8 + col;
+    }
+
+
+    public boolean makeMove(int fromSquare, int toSquare) {
+
+        // First check if there is peace on the board and which bitboard it belongs to
+
+        setBitboard(3, getBitboard(3) ^ 1L);
+
+        return false;
+    }
+
     /**
      * Retrieves the bitboard for a specific piece type.
      *
@@ -73,6 +88,14 @@ public class BoardState {
      */
     public long getBitboard(int index) {
         return bitboards[index];
+    }
+
+    public long getWhitePawns() {
+        return bitboards[0];
+    }
+
+    public long getBlackPieces() {
+        return bitboards[6] | bitboards[7] | bitboards[8] | bitboards[9] | bitboards[10] | bitboards[11];
     }
 
     /**
@@ -119,16 +142,18 @@ public class BoardState {
      * with centered and filled Unicode chess pieces.
      */
     public void print() {
-        StringBuilder boardStr = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
-        for (int rank = 7; rank >= 0; rank--) {
-            boardStr.append(rank + 1).append(" "); // Add row label on the left
+        for (int rank = 8; rank > 0; rank--) {
+            sb.append(rank).append(' '); // Rank label on the left
+
             for (int file = 0; file < 8; file++) {
-                int square = rank * 8 + file;
-                long bit = 1L << square;
+
+                int square = 8 * rank - file - 1; // Square number (63-0)
+                long bit = 1L << square; // Mask
 
                 String piece = "   "; // Default to empty square (blank)
-                String color = "";  // Default color
+                String color = ""; // Default color
                 for (int i = 0; i < 12; i++) {
                     if ((bitboards[i] & bit) != 0) {
                         piece = " " + getUnicodePiece(i) + " "; // Centered with spaces
@@ -141,15 +166,12 @@ public class BoardState {
                 String background = ((rank + file) % 2 == 0) ? "\u001B[48;5;94m" : "\u001B[48;5;101m";
 
                 // Append colored piece or empty square
-                boardStr.append(background).append(color).append(piece).append("\u001B[0m");
+                sb.append(background).append(color).append(piece).append("\u001B[0m");
             }
-            boardStr.append("\n"); // Move to the next row
+            sb.append("\n");
         }
-
-        // Add column labels at the bottom
-        boardStr.append("   a  b  c  d  e  f  g  h\n");
-
-        System.out.print(boardStr);
+        sb.append("   a  b  c  d  e  f  g  h\n");
+        System.out.print(sb);
     }
 
     /**
