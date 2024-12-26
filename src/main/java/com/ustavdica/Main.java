@@ -8,7 +8,7 @@ public class Main {
 
         BoardState boardState = new BoardState();
 
-        boardState.printBoard();
+        boardState.print();
 
     }
 

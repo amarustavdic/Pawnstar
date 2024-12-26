@@ -115,27 +115,40 @@ public class BoardState {
     }
 
     /**
-     * Prints the current board state to the console in a human-readable format.
+     *  Prints the current board state to the console in a human-readable format
+     *  with row labels on the left and column labels on the bottom.
      */
-    public void printBoard() {
-        // TODO: Add row/column labels for better readability.
+    public void print() {
         StringBuilder boardStr = new StringBuilder();
+
         for (int rank = 7; rank >= 0; rank--) {
+            boardStr.append(rank + 1).append(" "); // Add row label on the left
             for (int file = 0; file < 8; file++) {
                 int square = rank * 8 + file;
                 long bit = 1L << square;
 
-                char piece = '.'; // Default to empty square
+                char piece = ' '; // Default to empty square (blank)
+                String color = ""; // Default color
                 for (int i = 0; i < 12; i++) {
                     if ((bitboards[i] & bit) != 0) {
                         piece = getPieceChar(i);
+                        color = i < 6 ? "\u001B[1m" : "\u001B[1;30m"; // Bold (white default) or Bold Black
                         break;
                     }
                 }
-                boardStr.append(piece).append(" ");
+
+                // Alternate background colors for a checkerboard effect
+                String background = ((rank + file) % 2 == 0) ? "\u001B[48;5;94m" : "\u001B[48;5;130m"; // Light brown (94) or Dark brown (130)
+
+                // Append colored piece or empty square
+                boardStr.append(background).append(color).append(piece).append(" \u001B[0m");
             }
-            boardStr.append("\n");
+            boardStr.append("\n"); // Move to the next row
         }
+
+        // Add column labels at the bottom
+        boardStr.append("  a b c d e f g h\n");
+
         System.out.print(boardStr);
     }
 
