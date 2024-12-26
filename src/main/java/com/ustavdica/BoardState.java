@@ -115,8 +115,8 @@ public class BoardState {
     }
 
     /**
-     *  Prints the current board state to the console in a human-readable format
-     *  with row labels on the left and column labels on the bottom.
+     * Prints the current board state to the console in a human-readable format
+     * with centered and filled Unicode chess pieces.
      */
     public void print() {
         StringBuilder boardStr = new StringBuilder();
@@ -127,53 +127,55 @@ public class BoardState {
                 int square = rank * 8 + file;
                 long bit = 1L << square;
 
-                char piece = ' '; // Default to empty square (blank)
-                String color = ""; // Default color
+                String piece = "   "; // Default to empty square (blank)
+                String color = "";  // Default color
                 for (int i = 0; i < 12; i++) {
                     if ((bitboards[i] & bit) != 0) {
-                        piece = getPieceChar(i);
-                        color = i < 6 ? "\u001B[1m" : "\u001B[1;30m"; // Bold (white default) or Bold Black
+                        piece = " " + getUnicodePiece(i) + " "; // Centered with spaces
+                        color = i < 6 ? "\u001B[1;29m" : "\u001B[1;30m"; // White (bold white) or Black (bold black)
                         break;
                     }
                 }
 
                 // Alternate background colors for a checkerboard effect
-                String background = ((rank + file) % 2 == 0) ? "\u001B[48;5;94m" : "\u001B[48;5;130m"; // Light brown (94) or Dark brown (130)
+                String background = ((rank + file) % 2 == 0) ? "\u001B[48;5;94m" : "\u001B[48;5;101m";
 
                 // Append colored piece or empty square
-                boardStr.append(background).append(color).append(piece).append(" \u001B[0m");
+                boardStr.append(background).append(color).append(piece).append("\u001B[0m");
             }
             boardStr.append("\n"); // Move to the next row
         }
 
         // Add column labels at the bottom
-        boardStr.append("  a b c d e f g h\n");
+        boardStr.append("   a  b  c  d  e  f  g  h\n");
 
         System.out.print(boardStr);
     }
 
     /**
-     * Maps a piece index to its corresponding character representation.
+     * Maps a piece index to its corresponding Unicode chess character.
      *
      * @param index The index of the piece type (0-11).
-     * @return A character representing the piece.
+     * @return A Unicode character representing the chess piece.
      */
-    private char getPieceChar(int index) {
+    private char getUnicodePiece(int index) {
+        // TODO: This can be simplified since I am using same characters for both set of peaces
         return switch (index) {
-            case 0 -> 'P'; // White Pawn
-            case 1 -> 'N'; // White Knight
-            case 2 -> 'B'; // White Bishop
-            case 3 -> 'R'; // White Rook
-            case 4 -> 'Q'; // White Queen
-            case 5 -> 'K'; // White King
-            case 6 -> 'p'; // Black Pawn
-            case 7 -> 'n'; // Black Knight
-            case 8 -> 'b'; // Black Bishop
-            case 9 -> 'r'; // Black Rook
-            case 10 -> 'q'; // Black Queen
-            case 11 -> 'k'; // Black King
-            default -> '.';
+            case 0 -> '\u265F'; // White Pawn
+            case 1 -> '\u265E'; // White Knight
+            case 2 -> '\u265D'; // White Bishop
+            case 3 -> '\u265C'; // White Rook
+            case 4 -> '\u265B'; // White Queen
+            case 5 -> '\u265A'; // White King
+            case 6 -> '\u265F'; // Black Pawn
+            case 7 -> '\u265E'; // Black Knight
+            case 8 -> '\u265D'; // Black Bishop
+            case 9 -> '\u265C'; // Black Rook
+            case 10 -> '\u265B'; // Black Queen
+            case 11 -> '\u265A'; // Black King
+            default -> ' '; // Empty square
         };
     }
+
 
 }
