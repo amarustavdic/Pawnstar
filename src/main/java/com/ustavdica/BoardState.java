@@ -1,119 +1,166 @@
 package com.ustavdica;
 
+/**
+ * Represents the state of a chessboard using bitboards and additional game state information.
+ */
 public class BoardState {
 
-    private long whitePawns;
-    private long whiteKnights;
-    private long whiteBishops;
-    private long whiteRooks;
-    private long whiteQueens;
-    private long whiteKing;
+    /**
+     * Array of 12 bitboards representing the positions of all pieces.
+     * Index mapping:
+     * 0-5: White pieces (Pawns, Knights, Bishops, Rooks, Queens, King).
+     * 6-11: Black pieces (Pawns, Knights, Bishops, Rooks, Queens, King).
+     */
+    private final long[] bitboards;
 
-    private long blackPawns;
-    private long blackKnights;
-    private long blackBishops;
-    private long blackRooks;
-    private long blackQueens;
-    private long blackKing;
+    /**
+     * Encodes additional game state information:
+     * - Bit 0: Whose turn it is (1 = white to move, 0 = black to move).
+     * - Bits 1-4: Castling rights (1 = white kingside, 2 = white queenside, 4 = black kingside, 8 = black queenside).
+     * - Bits 5-10: En passant target square (6 bits for square index or 0 if none).
+     * - Bits 11-16: Fifty-move rule counter.
+     * - Bits 17-31: Full move counter.
+     */
+    private long stateInfo;
 
-    private boolean whiteToMove;
-
+    /**
+     * Constructs a new BoardState with the initial chessboard setup.
+     */
     public BoardState() {
-        this.whiteToMove = true;
-
+        this.bitboards = new long[12];
+        this.stateInfo = 0;
+        initializeBoard();
     }
 
+    /**
+     * Constructs a deep copy of another BoardState.
+     *
+     * @param other The BoardState to copy.
+     */
+    public BoardState(BoardState other) {
+        this.bitboards = other.bitboards.clone();
+        this.stateInfo = other.stateInfo;
+    }
+
+    /**
+     * Initializes the board to the standard starting chess position.
+     */
     private void initializeBoard() {
-        whitePawns = 0x000000000000FF00L;
-        whiteKnights = 0x0000000000000042L;
-        whiteBishops = 0x0000000000000024L;
-        whiteRooks = 0x0000000000000081L;
-        whiteQueens = 0x0000000000000008L;
-        whiteKing = 0x0000000000000010L;
+        // White pieces
+        bitboards[0] = 0x000000000000FF00L; // Pawns
+        bitboards[1] = 0x0000000000000042L; // Knights
+        bitboards[2] = 0x0000000000000024L; // Bishops
+        bitboards[3] = 0x0000000000000081L; // Rooks
+        bitboards[4] = 0x0000000000000008L; // Queens
+        bitboards[5] = 0x0000000000000010L; // King
 
-        blackPawns = 0x00FF000000000000L;
-        blackKnights = 0x4200000000000000L;
-        blackBishops = 0x2400000000000000L;
-        blackRooks = 0x8100000000000000L;
-        blackQueens = 0x0800000000000000L;
-        blackKing = 0x1000000000000000L;
+        // Black pieces
+        bitboards[6] = 0x00FF000000000000L; // Pawns
+        bitboards[7] = 0x4200000000000000L; // Knights
+        bitboards[8] = 0x2400000000000000L; // Bishops
+        bitboards[9] = 0x8100000000000000L; // Rooks
+        bitboards[10] = 0x0800000000000000L; // Queens
+        bitboards[11] = 0x1000000000000000L; // King
+
+        stateInfo = 0b1111L; // Both sides can castle initially
     }
 
-    // Getters for bitboards
-    public long getWhitePawns() {
-        return whitePawns;
+    /**
+     * Retrieves the bitboard for a specific piece type.
+     *
+     * @param index The index of the piece type (0-11).
+     * @return The bitboard representing the positions of the specified piece type.
+     */
+    public long getBitboard(int index) {
+        return bitboards[index];
     }
 
-    public long getWhiteKnights() {
-        return whiteKnights;
+    /**
+     * Updates the bitboard for a specific piece type.
+     *
+     * @param index The index of the piece type (0-11).
+     * @param value The new bitboard value.
+     */
+    public void setBitboard(int index, long value) {
+        bitboards[index] = value;
     }
 
-    public long getWhiteBishops() {
-        return whiteBishops;
-    }
-
-    public long getWhiteRooks() {
-        return whiteRooks;
-    }
-
-    public long getWhiteQueens() {
-        return whiteQueens;
-    }
-
-    public long getWhiteKing() {
-        return whiteKing;
-    }
-
-    public long getBlackPawns() {
-        return blackPawns;
-    }
-
-    public long getBlackKnights() {
-        return blackKnights;
-    }
-
-    public long getBlackBishops() {
-        return blackBishops;
-    }
-
-    public long getBlackRooks() {
-        return blackRooks;
-    }
-
-    public long getBlackQueens() {
-        return blackQueens;
-    }
-
-    public long getBlackKing() {
-        return blackKing;
-    }
-
-    // Method to check if it is white's turn
+    /**
+     * Checks whose turn it is.
+     *
+     * @return True if it is white's turn, false if it is black's turn.
+     */
     public boolean isWhiteToMove() {
-        return whiteToMove;
+        return (stateInfo & 1) != 0;
     }
 
-    // Toggle the turn
+    /**
+     * Toggles the turn between white and black.
+     */
     public void toggleTurn() {
-        whiteToMove = !whiteToMove;
+        stateInfo ^= 1; // Flip the first bit
     }
 
-    // Utility method to print the bitboard in a readable format
-    public static void printBitboard(long bitboard) {
+    /**
+     * Computes a bitboard representing all occupied squares on the board.
+     *
+     * @return A bitboard with bits set for all occupied squares.
+     */
+    public long getAllOccupiedSquares() {
+        long occupied = 0L;
+        for (long bitboard : bitboards) {
+            occupied |= bitboard;
+        }
+        return occupied;
+    }
+
+    /**
+     * Prints the current board state to the console in a human-readable format.
+     */
+    public void printBoard() {
+        // TODO: Add row/column labels for better readability.
+        StringBuilder boardStr = new StringBuilder();
         for (int rank = 7; rank >= 0; rank--) {
             for (int file = 0; file < 8; file++) {
                 int square = rank * 8 + file;
-                System.out.print(((bitboard & (1L << square)) != 0) ? "1 " : "0 ");
+                long bit = 1L << square;
+
+                char piece = '.'; // Default to empty square
+                for (int i = 0; i < 12; i++) {
+                    if ((bitboards[i] & bit) != 0) {
+                        piece = getPieceChar(i);
+                        break;
+                    }
+                }
+                boardStr.append(piece).append(" ");
             }
-            System.out.println();
+            boardStr.append("\n");
         }
-        System.out.println();
+        System.out.print(boardStr);
     }
 
-    // Method to get all occupied squares
-    public long getAllOccupiedSquares() {
-        return whitePawns | whiteKnights | whiteBishops | whiteRooks | whiteQueens | whiteKing |
-                blackPawns | blackKnights | blackBishops | blackRooks | blackQueens | blackKing;
+    /**
+     * Maps a piece index to its corresponding character representation.
+     *
+     * @param index The index of the piece type (0-11).
+     * @return A character representing the piece.
+     */
+    private char getPieceChar(int index) {
+        return switch (index) {
+            case 0 -> 'P'; // White Pawn
+            case 1 -> 'N'; // White Knight
+            case 2 -> 'B'; // White Bishop
+            case 3 -> 'R'; // White Rook
+            case 4 -> 'Q'; // White Queen
+            case 5 -> 'K'; // White King
+            case 6 -> 'p'; // Black Pawn
+            case 7 -> 'n'; // Black Knight
+            case 8 -> 'b'; // Black Bishop
+            case 9 -> 'r'; // Black Rook
+            case 10 -> 'q'; // Black Queen
+            case 11 -> 'k'; // Black King
+            default -> '.';
+        };
     }
 
 }
