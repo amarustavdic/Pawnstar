@@ -6,9 +6,9 @@ public class Main {
         BoardManipulator manipulator = new BoardManipulator();
         BoardState boardState = new BoardState();
 
-        boardState.print();
+        boardState.print(true, true);
         boardState.makeMove(8, 17);
-        boardState.print();
+        boardState.print(false, true);
 
     }
 

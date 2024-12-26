@@ -137,13 +137,55 @@ public class BoardState {
         return occupied;
     }
 
+    private String getAlgebraicNotation(int squareIndex) {
+        int file = squareIndex % 8;
+        int rank = squareIndex / 8;
+        return "" + (char) ('a' + file) + (rank + 1);
+    }
+
+    private int calculateMaterial(int start, int end) {
+        int materialValue = 0;
+        int[] pieceValues = {1, 3, 3, 5, 9, 0}; // Pawn, Knight, Bishop, Rook, Queen, King
+        for (int i = start; i <= end; i++) {
+            materialValue += Long.bitCount(bitboards[i]) * pieceValues[i % 6];
+        }
+        return materialValue;
+    }
+
     /**
      * Prints the current board state to the console in a human-readable format
      * with centered and filled Unicode chess pieces.
      */
-    public void print() {
-        StringBuilder sb = new StringBuilder();
+    public void print(boolean showSquareNumbers, boolean showStateInfo) {
+        String[] info = new String[8];
 
+        // Turn information
+        info[0] = "Turn: " + (isWhiteToMove() ? "White" : "Black");
+
+        // Castling rights
+        info[1] = "Castling Rights: " +
+                ((stateInfo & 0b0001) != 0 ? "K" : "") +
+                ((stateInfo & 0b0010) != 0 ? "Q" : "") +
+                ((stateInfo & 0b0100) != 0 ? "k" : "") +
+                ((stateInfo & 0b1000) != 0 ? "q" : "");
+
+        // En passant target square
+        int enPassantSquare = (int) ((stateInfo >> 5) & 0b111111);
+        info[2] = "En Passant Target: " + (enPassantSquare != 0 ? getAlgebraicNotation(enPassantSquare) : "None");
+
+        // Fifty-move rule counter
+        info[3] = "Fifty-Move Counter: " + ((stateInfo >> 11) & 0b111111);
+
+        // Full move counter
+        info[4] = "Full Move Counter: " + ((stateInfo >> 17) & 0b111111111111111);
+
+        // Material balance
+        int whiteMaterial = calculateMaterial(0, 5);
+        int blackMaterial = calculateMaterial(6, 11);
+        info[5] = "Material Balance: White " + whiteMaterial + " - " + blackMaterial + " Black";
+
+
+        StringBuilder sb = new StringBuilder();
         for (int rank = 8; rank > 0; rank--) {
             sb.append(rank).append(' '); // Rank label on the left
 
@@ -167,6 +209,27 @@ public class BoardState {
 
                 // Append colored piece or empty square
                 sb.append(background).append(color).append(piece).append("\u001B[0m");
+            }
+
+            if (showSquareNumbers) {
+                sb.append("   ");
+
+                for (int file = 0; file < 8; file++) {
+                    int square = 8 * rank - file - 1; // Square number (63-0)
+                    String squareNumber = square > 9 ? " " + square : "  " + square;
+
+                    // Alternate background colors for a checkerboard effect
+                    String background = ((rank + file) % 2 == 0) ? "\u001B[48;5;232m" : "\u001B[48;5;235m";
+
+                    sb.append(background).append(squareNumber).append("\u001B[0m");
+                }
+            }
+
+            if (showStateInfo) {
+                int infoIndex = 8 - rank;
+                if (info[infoIndex] != null) {
+                    sb.append("   ").append(info[infoIndex]);
+                }
             }
             sb.append("\n");
         }
