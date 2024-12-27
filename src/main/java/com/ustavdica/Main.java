@@ -11,8 +11,9 @@ public class Main {
         System.out.println(moveStatus);
         boardState.print(true, false);
 
-
+        long start = System.currentTimeMillis();
         manipulator.generatePawnAttacks(boardState);
+        System.out.println(System.currentTimeMillis() - start);
     }
 
 }
