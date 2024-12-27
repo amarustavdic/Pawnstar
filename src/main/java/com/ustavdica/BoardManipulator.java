@@ -43,6 +43,59 @@ public class BoardManipulator {
 
     }
 
+    public void generateAttacks() {
+
+    }
+
+    public long generatePawnAttacks(BoardState boardState) {
+        long pawnAttacks = 0L;
+        final long FILE_A = 0x0101010101010101L; // Mask for the a-file
+        final long FILE_H = 0x8080808080808080L; // Mask for the h-file
+
+        if (boardState.isWhiteToMove()) {
+            // Generate black pawn attacks
+            long positions = boardState.getBlackPawns();
+            pawnAttacks |= (positions & ~FILE_H) >> 7; // Left diagonal attacks
+            pawnAttacks |= (positions & ~FILE_A) >> 9; // Right diagonal attacks
+        } else {
+            // Generate white pawn attacks
+            long positions = boardState.getWhitePawns();
+            pawnAttacks |= (positions & ~FILE_A) << 7; // Left diagonal attacks
+            pawnAttacks |= (positions & ~FILE_H) << 9; // Right diagonal attacks
+        }
+
+        printAttacks(pawnAttacks);
+        return pawnAttacks;
+    }
+
+
+    private void printAttacks(long bitboard) {
+        StringBuilder sb = new StringBuilder();
+        for (int rank = 8; rank > 0; rank--) {
+            sb.append(rank).append(' '); // Rank label on the left
+
+            for (int file = 0; file < 8; file++) {
+                int square = 8 * rank - file - 1; // Square number (0-63)
+                long mask = 1L << square; // Bit mask for the current square
+
+                // Determine background color
+                String background = ((rank + file) % 2 == 0) ? "\u001B[48;5;232m" : "\u001B[48;5;235m";
+
+                // Highlight with red if this square is attacked (bitboard has a 1)
+                if ((bitboard & mask) != 0) {
+                    background = ((rank + file) % 2 == 0) ? "\u001B[48;5;124m" : "\u001B[48;5;160m"; // Dark red and light red
+                }
+
+                // Append the background
+                sb.append(background).append("   ").append("\u001B[0m");
+            }
+            sb.append("\n");
+        }
+        sb.append("   a  b  c  d  e  f  g  h\n");
+        System.out.print(sb);
+    }
+
+
 
     private static void addMovesToList(List<Move> moves, long toBitboard, int shift) {
         while (toBitboard != 0) {

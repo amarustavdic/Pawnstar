@@ -72,11 +72,42 @@ public class BoardState {
 
 
     public boolean makeMove(int fromSquare, int toSquare) {
+        long orgSquareBit = 1L << fromSquare;
+        long dstSquareBit = 1L << toSquare;
 
-        // First check if there is peace on the board and which bitboard it belongs to
+        System.out.println(Long.toBinaryString(orgSquareBit));
 
-        setBitboard(3, getBitboard(3) ^ 1L);
+        for (int i = 0; i < 12; i++) {
+            // If there is bitboard that has that peace
+            if ((bitboards[i] & orgSquareBit) != 0) {
 
+                // Remove from origin
+                setBitboard(i, bitboards[i] ^ orgSquareBit);
+
+                // This means that it is white pawns
+                if (i == 0) {
+                    System.out.println("Yes it is white pawn");
+                    long validMask = (orgSquareBit << 7) | (orgSquareBit << 9);
+                    System.out.println(Long.toHexString(validMask));
+                }
+
+                // Based of index you know which peace it is
+                switch (i) {
+                    case 0:
+
+                        if ((33L ^ toSquare) > 0) {
+                            // Make move
+                            // TODO: ofc not handling the case if something is on there on dst sqr
+                            setBitboard(i, bitboards[i] | orgSquareBit);
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    case 1:
+                        break;
+                }
+            };
+        }
         return false;
     }
 
@@ -92,6 +123,10 @@ public class BoardState {
 
     public long getWhitePawns() {
         return bitboards[0];
+    }
+
+    public long getBlackPawns() {
+        return bitboards[6];
     }
 
     public long getBlackPieces() {

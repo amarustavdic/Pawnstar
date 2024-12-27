@@ -6,10 +6,13 @@ public class Main {
         BoardManipulator manipulator = new BoardManipulator();
         BoardState boardState = new BoardState();
 
-        boardState.print(true, true);
-        boardState.makeMove(8, 17);
-        boardState.print(false, true);
+        boardState.print(true, false);
+        boolean moveStatus = boardState.makeMove(8, 17);
+        System.out.println(moveStatus);
+        boardState.print(true, false);
 
+
+        manipulator.generatePawnAttacks(boardState);
     }
 
 }
