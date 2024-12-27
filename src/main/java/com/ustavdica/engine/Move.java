@@ -1,4 +1,4 @@
-package com.ustavdica;
+package com.ustavdica.engine;
 
 public class Move {
 

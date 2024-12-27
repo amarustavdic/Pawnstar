@@ -1,7 +1,7 @@
 package com.ustavdica.engine.search.strategies.mcts;
 
-import com.ustavdica.BoardState;
-import com.ustavdica.Move;
+import com.ustavdica.engine.Position;
+import com.ustavdica.engine.Move;
 import com.ustavdica.engine.search.strategies.SearchStrategy;
 import com.ustavdica.engine.search.strategies.mcts.rollout.RolloutStrategy;
 
@@ -35,7 +35,7 @@ public class MonteCarloTreeSearch implements SearchStrategy {
      * @return The best move determined by MCTS, or null if no move could be found.
      */
     @Override
-    public Move findBestMove(BoardState state, long timeLimit) {
+    public Move findBestMove(Position state, long timeLimit) {
 
         long start = System.currentTimeMillis();
         root = new TreeNode(state, null);
@@ -48,6 +48,9 @@ public class MonteCarloTreeSearch implements SearchStrategy {
             }
             TreeNode expandedNode = expand(selectedNode);
             double rolloutResult = rollout(expandedNode);
+
+            System.out.println(rolloutResult);
+
             backpropagate(expandedNode, rolloutResult);
         }
         return root.getBestMove();
@@ -64,7 +67,7 @@ public class MonteCarloTreeSearch implements SearchStrategy {
         while (node.hasChildren()) {
             node = node.getBestChild();
         }
-        return null;
+        return node;
     }
 
     /**
@@ -79,7 +82,7 @@ public class MonteCarloTreeSearch implements SearchStrategy {
             node.expand();
             return node.getRandomChild();
         }
-        return null;
+        return node;
     }
 
     // TODO: Expand function might benefit from strategy pattern, for different expanding strategies...

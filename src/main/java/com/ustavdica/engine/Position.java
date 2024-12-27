@@ -1,9 +1,12 @@
-package com.ustavdica;
+package com.ustavdica.engine;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents the state of a chessboard using bitboards and additional game state information.
  */
-public class BoardState {
+public class Position {
 
     /**
      * Array of 12 bitboards representing the positions of all pieces.
@@ -26,7 +29,7 @@ public class BoardState {
     /**
      * Constructs a new BoardState with the initial chessboard setup.
      */
-    public BoardState() {
+    public Position() {
         this.bitboards = new long[12];
         this.stateInfo = 0;
         initializeBoard();
@@ -37,7 +40,7 @@ public class BoardState {
      *
      * @param other The BoardState to copy.
      */
-    public BoardState(BoardState other) {
+    public Position(Position other) {
         this.bitboards = other.bitboards.clone();
         this.stateInfo = other.stateInfo;
     }
@@ -106,7 +109,8 @@ public class BoardState {
                     case 1:
                         break;
                 }
-            };
+            }
+            ;
         }
         return false;
     }
@@ -297,11 +301,80 @@ public class BoardState {
         };
     }
 
-    public boolean isTerminal() {
 
-        // TODO: Figure out how to figure out if state is terminal
+    public boolean isTerminal() {
+        MoveGenerator moveGenerator = new MoveGenerator();
+        List<Move> legalMoves = moveGenerator.generateLegalMoves(this);
+
+        // Check if there are no legal moves
+        if (legalMoves.isEmpty()) {
+            if (isInCheck()) {
+                // Checkmate: No legal moves and the king is in check
+                return true;
+            } else {
+                // Stalemate: No legal moves but the king is not in check
+                return true;
+            }
+        }
+
+        // Check for draw conditions
+        if (isDrawByFiftyMoveRule() || isDrawByThreefoldRepetition() || isDrawByInsufficientMaterial()) {
+            return true;
+        }
+
+        // Otherwise, the position is not terminal
+        return false;
+    }
+
+    public boolean isInCheck() {
+        long kingBitboard = isWhiteToMove() ? bitboards[5] : bitboards[11];
+
+        AttackGenerator attackGenerator = new AttackGenerator();
+
+        long opponentAttackMask = isWhiteToMove()
+                ? attackGenerator.getBlackAttackMask(this)
+                : attackGenerator.getWhiteAttackMask(this);
+        return (kingBitboard & opponentAttackMask) != 0;
+    }
+
+    private boolean isDrawByFiftyMoveRule() {
+        int fiftyMoveCounter = (int) ((stateInfo >> 11) & 0b111111);
+        return fiftyMoveCounter >= 50;
+    }
+
+    private boolean isDrawByThreefoldRepetition() {
+        // Placeholder: Requires game state history for comparison
+        return false;
+    }
+
+    private boolean isDrawByInsufficientMaterial() {
+        long whitePieces = bitboards[0] | bitboards[1] | bitboards[2] | bitboards[3] | bitboards[4] | bitboards[5];
+        long blackPieces = bitboards[6] | bitboards[7] | bitboards[8] | bitboards[9] | bitboards[10] | bitboards[11];
+
+        // Check for bare kings
+        if (whitePieces == bitboards[5] && blackPieces == bitboards[11]) {
+            return true;
+        }
+
+        // Check for king and minor piece vs king
+        if (Long.bitCount(whitePieces) == 2 && Long.bitCount(blackPieces) == 1) {
+            return isMinorPieceRemaining(whitePieces);
+        }
+        if (Long.bitCount(blackPieces) == 2 && Long.bitCount(whitePieces) == 1) {
+            return isMinorPieceRemaining(blackPieces);
+        }
 
         return false;
     }
 
+    private boolean isMinorPieceRemaining(long pieces) {
+        return (pieces & bitboards[1]) != 0 || (pieces & bitboards[2]) != 0; // Knight or Bishop
+    }
+
+
+    // TODO: Finish the function that applies the move to position
+    public void makeMove(Move move) {
+
+
+    }
 }

@@ -1,19 +1,27 @@
 package com.ustavdica;
 
+import com.ustavdica.engine.ChessEngine;
+import com.ustavdica.engine.Move;
+import com.ustavdica.engine.Position;
+
 public class Main {
     public static void main(String[] args) {
 
-        BoardManipulator manipulator = new BoardManipulator();
-        BoardState boardState = new BoardState();
 
-        boardState.print(true, false);
-        boolean moveStatus = boardState.makeMove(8, 17);
-        System.out.println(moveStatus);
-        boardState.print(true, false);
+        ChessEngine engine = new ChessEngine();
 
-        long start = System.currentTimeMillis();
-        manipulator.generatePawnAttacks(boardState);
-        System.out.println(System.currentTimeMillis() - start);
+        Position position = new Position();
+
+        position.print(false, false);
+
+        engine.setMCTSSearchWithRandomRollout();
+
+        // Find the best move with a 5-second time limit
+        long timeLimit = 5000;
+        Move bestMove = engine.findBestMove(position, timeLimit);
+
+        System.out.println(bestMove);
+
     }
 
 }

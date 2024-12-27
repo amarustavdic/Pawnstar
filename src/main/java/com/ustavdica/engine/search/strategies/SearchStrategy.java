@@ -1,10 +1,10 @@
 package com.ustavdica.engine.search.strategies;
 
-import com.ustavdica.BoardState;
-import com.ustavdica.Move;
+import com.ustavdica.engine.Position;
+import com.ustavdica.engine.Move;
 
 public interface SearchStrategy {
 
-    Move findBestMove(BoardState boardState, long timeLimit);
+    Move findBestMove(Position position, long timeLimit);
 
 }

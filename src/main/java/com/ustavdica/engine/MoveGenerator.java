@@ -1,35 +1,35 @@
-package com.ustavdica;
+package com.ustavdica.engine;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BoardManipulator {
+public class MoveGenerator {
 
     /**
      * Generates all legal moves for the current player in the given board state.
      * Legal moves ensure the king is not in check after the move.
      *
-     * @param boardState The current board state.
+     * @param position The current board state.
      * @return A list of all legal moves for the current player.
      */
-    public List<Move> generateLegalMoves(BoardState boardState) {
+    public List<Move> generateLegalMoves(Position position) {
 
         List<Move> moves = new ArrayList<>();
 
         // Get occupied squares
-        long allOccupied = boardState.getAllOccupiedSquares();
+        long allOccupied = position.getAllOccupiedSquares();
 
         // Generate one-step forward moves
-        long oneStep = (boardState.getWhitePawns() << 8) & ~allOccupied;
+        long oneStep = (position.getWhitePawns() << 8) & ~allOccupied;
 
         // Generate two-step moves (only for pawns on the starting rank)
         long startingRank = 0x000000000000FF00L; // Rank 2 for white pawns
-        long twoSteps = ((boardState.getWhitePawns() & startingRank) << 16) & ~allOccupied & ~(allOccupied << 8);
+        long twoSteps = ((position.getWhitePawns() & startingRank) << 16) & ~allOccupied & ~(allOccupied << 8);
 
         // Generate captures
-        long enemyPieces = boardState.getBlackPieces();
-        long leftCaptures = (boardState.getWhitePawns() << 7) & enemyPieces & ~0x8080808080808080L; // Exclude wraparounds
-        long rightCaptures = (boardState.getWhitePawns() << 9) & enemyPieces & ~0x0101010101010101L; // Exclude wraparounds
+        long enemyPieces = position.getBlackPieces();
+        long leftCaptures = (position.getWhitePawns() << 7) & enemyPieces & ~0x8080808080808080L; // Exclude wraparounds
+        long rightCaptures = (position.getWhitePawns() << 9) & enemyPieces & ~0x0101010101010101L; // Exclude wraparounds
 
         // Add moves to the list
         addMovesToList(moves, oneStep, 8); // One-step forward
@@ -47,19 +47,19 @@ public class BoardManipulator {
 
     }
 
-    public long generatePawnAttacks(BoardState boardState) {
+    public long generatePawnAttacks(Position position) {
         long pawnAttacks = 0L;
         final long FILE_A = 0x0101010101010101L; // Mask for the a-file
         final long FILE_H = 0x8080808080808080L; // Mask for the h-file
 
-        if (boardState.isWhiteToMove()) {
+        if (position.isWhiteToMove()) {
             // Generate black pawn attacks
-            long positions = boardState.getBlackPawns();
+            long positions = position.getBlackPawns();
             pawnAttacks |= (positions & ~FILE_H) >> 7; // Left diagonal attacks
             pawnAttacks |= (positions & ~FILE_A) >> 9; // Right diagonal attacks
         } else {
             // Generate white pawn attacks
-            long positions = boardState.getWhitePawns();
+            long positions = position.getWhitePawns();
             pawnAttacks |= (positions & ~FILE_A) << 7; // Left diagonal attacks
             pawnAttacks |= (positions & ~FILE_H) << 9; // Right diagonal attacks
         }
