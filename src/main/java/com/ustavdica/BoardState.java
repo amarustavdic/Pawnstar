@@ -297,4 +297,11 @@ public class BoardState {
         };
     }
 
+    public boolean isTerminal() {
+
+        // TODO: Figure out how to figure out if state is terminal
+
+        return false;
+    }
+
 }
